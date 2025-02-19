@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet"
+    integrity="sha384-QWTKZyjpPEjISv5WaRU9OFeRpok6YctnYmDr5pNlyT2bRjXh0JMhjY6hW+ALEwIH" crossorigin="anonymous" />
+  <title>CRUD app</title>
+  <style>
+    input {
+      color: Black;
+      width: 100%;
+    }
+
+    .todo {
+      background-color: #d1ffbb;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="my-3 container">
+    <div id="app">
+      <div>
+        <h1>CRUD app</h1>
+        <div v-if="loading" class="spinner-border" role="status"><span class="visually-hidden">Loading...</span></div>
+        <div class="mt-3" v-for="item in todos" :key="item.id"><my-todos :item="item" /></div>
+        <div class="text-center mt-3"><button type="button" class="btn btn-primary">Add item</button></div>
+      </div>
+    </div>
+  </div>
+
+  <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
+  <script>const myTodos = {
+
+      props: ['item',
+        'delete',
+        'update'],
+      template: ` 
+      <div class="mb-2 border todo border-secondary rounded">
+        <div class="row px-2 justify-content-end align-items-center">
+          <div class="col-8 flex-fill">
+            <p class="mb-0 mt-1">Id: {
+              { item.id } } , Version: { { item.v } } , Editing: { { item.editing } } </p><input class="mb-2" disabled
+              v-model="item.text" />
+          </div>
+          <div class="col-auto"><button type="button" class="btn btn-primary">Edit</button></div>
+          <div class="col-auto"><button type="button" class="btn btn-danger">Delete</button></div>
+        </div>
+      </div>
+    `,
+    };
+
+    const {createApp, defineModel, ref} = Vue;
+
+    const app = createApp({
+      components: {
+        myTodos,
+      },
+      data() {
+        return {
+          loading: false,
+          todos: [
+            {
+              id: 1,
+              text: 'sample', editing: false, v: 0
+            },
+            {id: 2, text: 'item two', editing: false, v: 0}]
+        };
+      },
+      methods: {
+        create: function () {
+          // Create
+        },
+        read: function () {
+          // Get data from the server
+        },
+        update: function () {
+          // Create
+        },
+        delete: function () {
+          //delete
+        },
+      },
+      mounted() {
+        console.log('Mounted');
+      },
+    }).mount('#app');
+  </script>
+</body>
+
+</html>
