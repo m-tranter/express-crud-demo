@@ -17,7 +17,7 @@ const makeItem = (obj) => {
   return { ...obj, id: v4(), editing: false, v: 0 }
 }
 
-let items = [makeItem({ text: "Use MongoDb for data peristence", priority: "1" })];
+let items = [makeItem({ text: "Use MongoDb for data persistence", priority: "1" })];
 
 app.use(express.json());
 app.use(express.static('public'));
