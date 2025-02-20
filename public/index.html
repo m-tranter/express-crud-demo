@@ -38,7 +38,7 @@
         display: block;
       }
       .myBtn {
-        width: 6rem;
+        margin-top: 20px;
       }
     </style>
   </head>
@@ -84,56 +84,80 @@
       const myTodos = {
         props: ['item', 'create', 'update', 'remove', 'cancel', 'edit'],
         template: `
-          <div class="mb-2 border todo border-secondary rounded">
-            <div class="row px-2 justify-content-end align-items-center">
-              <div class="col-7 flex-fill">
-                <p class="mb-0 mt-1">Id: {{ item.id }}</p>
-                <p class="mb-0">
-                  Version: {{ item.v }} , Editing: {{ item.editing }}
-                </p>
-                <label class="visually-hidden" :for="item.id + '_text'">Text</label>
-                <textarea rows="3"  :id="item.id + '_text'" class="mb-2" placeholder="Enter your task" :disabled="!item.editing" v-model="item.text"></textarea>
-              </div>
-              <div class="col-2 col-md-auto">
-                <label :for="item.id + '_priority'">Priority</label>
-                <input
-                  :id="item.id + '_priority'"
-                  type="number"
-                  v-model="item.priority"
-                  min='0' max='10'
-                  :disabled="!item.editing"
-                />
-              </div>
-              <div class="col-2 col-md-auto" :class="{'d-none': item.editing}">
-                <button
-                  type="button"
-                  @click="edit(item.id)"
-                  class="myBtn btn btn-primary"
-                >
-                  Edit
-                </button>
-              </div>
-              <div class="col-2 col-md-auto" :class="{'d-none': !item.editing}">
-                <button
-                  type="button"
-                  class="myBtn btn btn-primary"
-                  @click="update(item.id)"
-                >
-                  Save
-                </button>
-              </div>
-              <div class="col-2 col-md-auto" :class="{'d-none': item.editing}" >
-                <button type="button" class="myBtn btn btn-danger" @click="remove(item.id)">
-                  Delete
-                </button>
-              </div>
-              <div class="col-2 col-md-auto" :class="{'d-none': !item.editing}">
-                <button type="button" class="myBtn btn btn-danger"  @click="cancel(item.id)">
-                  Cancel
-                </button>
-              </div>
+    <div class="mb-2 border todo border-secondary rounded">
+      <div class="row px-2 ">
+        <div class="col-md-12 col-lg-8 flex-fill">
+          <div class="row ">
+            <div class="col-10 flex-fill">
+              <p class="mb-0 mt-1">Id: {{ item.id }}</p>
+              <p class="mb-0">
+                Version: {{ item.v }} , Editing: {{ item.editing }}
+              </p>
+              <label class="visually-hidden" :for="item.id + '_text'">Text</label>
+              <textarea
+                rows="3"
+                :id="item.id + '_text'"
+                class="mb-2"
+                placeholder="Enter your task"
+                :disabled="!item.editing"
+                v-model="item.text"
+              ></textarea>
             </div>
           </div>
+        </div>
+        <div class="col-12 col-lg-4  mb-3 mb-lg-0">
+          <div class="row mt-md-4 ">
+            <div class="col ">
+              <label :for="item.id + '_priority'">Priority</label>
+              <input
+                :id="item.id + '_priority'"
+                type="number"
+                v-model="item.priority"
+                min="0"
+                max="10"
+                :disabled="!item.editing"
+              />
+            </div>
+            <div class="col" :class="{'d-none': item.editing}">
+              <button
+                type="button"
+                @click="edit(item.id)"
+                class="myBtn btn btn-primary"
+              >
+                Edit
+              </button>
+            </div>
+            <div class="col" :class="{'d-none': !item.editing}">
+              <button
+                type="button"
+                class="myBtn btn btn-primary"
+                @click="update(item.id)"
+              >
+                Save
+              </button>
+            </div>
+            <div class="col-auto" :class="{'d-none': item.editing}">
+              <button
+                type="button"
+                class="myBtn btn btn-danger"
+                @click="remove(item.id)"
+              >
+                Delete
+              </button>
+            </div>
+            <div class="col-auto" :class="{'d-none': !item.editing}">
+              <button
+                type="button"
+                class="myBtn btn btn-danger"
+                @click="cancel(item.id)"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
             `,
       };
 
