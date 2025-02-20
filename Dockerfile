@@ -1,7 +1,8 @@
 ARG NODE_VERSION=22.14.0
+FROM node:${NODE_VERSION}-slim 
 ENV NODE_ENV=production
 ENV TZ="Europe/London"
-FROM node:${NODE_VERSION}-slim 
+
 COPY  . .
 WORKDIR /app
 
