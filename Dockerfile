@@ -1,25 +1,11 @@
 ARG NODE_VERSION=22.14.0
-
-
-FROM node:${NODE_VERSION}-slim as base
-
 ENV NODE_ENV=production
 ENV TZ="Europe/London"
+FROM node:${NODE_VERSION}-slim 
+COPY  . .
 WORKDIR /app
 
-# Build
-FROM base as build
-
-COPY package*.json ./
-RUN npm install --production \
-    && npm cache clean --force \
-    && rm -rf /tmp/*
-
-COPY  . .
-
 # Run
-FROM base
-ENV PORT=3001
 EXPOSE 3001
-
+RUN yarn install --production
 CMD [ "node", "index.js" ]
