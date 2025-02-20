@@ -2,12 +2,14 @@
 
 //import { } from 'dotenv/config';
 import express from 'express';
-
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { v4 } from 'uuid';
 
 const port = process.env.PORT || 3001;
-const app = express();
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const dir = path.join(__dirname, '../public');
 const myLogger = function(req, _, next) {
   console.log(`Incoming: ${req.url}`);
   next();
@@ -16,11 +18,11 @@ const myLogger = function(req, _, next) {
 const makeItem = (obj) => {
   return { ...obj, id: v4(), editing: false, v: 0 }
 }
-
 let items = [makeItem({ text: "Use MongoDb for data persistence", priority: "1" })];
 
+const app = express();
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(dir));
 app.use(myLogger);
 
 app.listen(port, (error) => {
