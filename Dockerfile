@@ -16,12 +16,10 @@ RUN npm install --production \
     && rm -rf /tmp/*
 
 COPY  . .
-RUN npm run build
 
 # Run
 FROM base
 ENV PORT=3001
 EXPOSE 3001
 
-COPY --from=build /src/.output /src/.output
-CMD [ "node", ".output/server/index.mjs" ]
+CMD [ "node", "app/index.js" ]
