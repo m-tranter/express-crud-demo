@@ -65,6 +65,9 @@
             <button type="button" class="btn btn-primary" @click="add">
               Add item
             </button>
+            <button type="button" class="ms-2 btn btn-primary" @click="read">
+              Reload
+            </button>
           </div>
 
           <div class="text-center mt-3">
@@ -82,18 +85,20 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
       const myTodos = {
-        props: ['item', 'create', 'update', 'remove', 'cancel', 'edit'],
+        props: ['item', 'update', 'remove', 'cancel', 'edit'],
         template: `
-    <div class="mb-2 border todo border-secondary rounded">
-      <div class="row px-2 ">
+    <div class="mb-2 border todo bordes-secondary rounded">
+      <div class="row px-2">
         <div class="col-md-12 col-lg-8 flex-fill">
-          <div class="row ">
+          <div class="row">
             <div class="col-10 flex-fill">
               <p class="mb-0 mt-1">Id: {{ item.id }}</p>
               <p class="mb-0">
                 Version: {{ item.v }} , Editing: {{ item.editing }}
               </p>
-              <label class="visually-hidden" :for="item.id + '_text'">Text</label>
+              <label class="visually-hidden" :for="item.id + '_text'"
+                >Text</label
+              >
               <textarea
                 rows="3"
                 :id="item.id + '_text'"
@@ -105,9 +110,9 @@
             </div>
           </div>
         </div>
-        <div class="col-12 col-lg-4  mb-3 mb-lg-0">
-          <div class="row mt-md-4 ">
-            <div class="col ">
+        <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+          <div class="row mt-md-4">
+            <div class="col">
               <label :for="item.id + '_priority'">Priority</label>
               <input
                 :id="item.id + '_priority'"
@@ -158,10 +163,10 @@
         </div>
       </div>
     </div>
-            `,
+                   `,
       };
 
-      const { createApp, defineModel, ref } = Vue;
+      const { createApp } = Vue;
 
       const app = createApp({
         components: {
@@ -175,6 +180,38 @@
           };
         },
         methods: {
+          doFetch: function (verb, body) {
+            this.loading = true;
+            this.msg = '';
+            let opts =
+              verb === '/read'
+                ? {}
+                : {
+                    method: 'post',
+                    body: JSON.stringify(body),
+                    headers: {
+                      'Content-Type': 'application/json; charset=utf-8',
+                    },
+                  };
+            fetch(verb, opts)
+              .then((response) => {
+                if (response.ok) {
+                  return response.json();
+                } else {
+                  throw 'Error fetching data.';
+                }
+              })
+              .then((data) => {
+                this.todos = data;
+              })
+              .catch((err) => {
+                console.log(err);
+                this.msg = 'Something went wrong.';
+              })
+              .finally(() => {
+                this.loading = false;
+              });
+          },
           cancel: function (id) {
             let item = this.todos.find((e) => e.id === id);
             item.text = this.temp;
@@ -196,126 +233,20 @@
               temp: '',
             });
           },
-          create: function (update) {
-            this.msg = '';
-            fetch('/create', {
-              method: 'post',
-              body: JSON.stringify(update),
-              headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-              },
-            })
-              .then((response) => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw 'Something went wrong.';
-                }
-              })
-              .then((data) => {
-                if (data.error) {
-                  this.msg = data.error;
-                } else {
-                  this.todos = data;
-                }
-              })
-              .catch((err) => {
-                console.log(err);
-                this.msg = 'Something went wrong.';
-              })
-              .finally(() => {
-                this.loading = false;
-              });
-          },
           read: function () {
-            this.loading = true;
-            this.msg = '';
-            fetch('/read')
-              .then((response) => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw 'Error fetching data.';
-                }
-              })
-              .then((data) => {
-                this.todos = data;
-              })
-              .catch((err) => {
-                console.log(err);
-                this.msg = 'Something went wrong.';
-              })
-              .finally(() => {
-                this.loading = false;
-              });
+            this.doFetch('/read', {});
           },
           update: function (id) {
             let update = this.todos.find((e) => e.id === id);
-            this.loading = true;
-            this.msg = '';
             if (id === 'Pending') {
-              this.create(update);
+              this.doFetch('/create', update);
             } else {
-              if (update) {
-                update.editing = false;
-                fetch('/update', {
-                  method: 'post',
-                  body: JSON.stringify(update),
-                  headers: {
-                    'Content-Type': 'application/json; charset=utf-8',
-                  },
-                })
-                  .then((response) => {
-                    if (response.ok) {
-                      return response.json();
-                    } else {
-                      throw 'Something went wrong.';
-                    }
-                  })
-                  .then((data) => {
-                    if (data.error) {
-                      this.msg = data.error;
-                    } else {
-                      this.todos = data;
-                    }
-                  })
-                  .catch((err) => {
-                    console.log(err);
-                    this.msg = 'Something went wrong.';
-                  })
-                  .finally(() => {
-                    this.loading = false;
-                  });
-              }
+              update.editing = false;
+              this.doFetch('/update', update);
             }
           },
           remove: function (id) {
-            this.loading = true;
-            this.msg = '';
-            fetch('/delete', {
-              method: 'post',
-              body: JSON.stringify({ id }),
-              headers: {
-                'Content-Type': 'application/json; charset=utf-8',
-              },
-            })
-              .then((response) => {
-                if (response.ok) {
-                  return response.json();
-                } else {
-                  throw 'Something went wrong.';
-                }
-              })
-              .then((data) => {
-                this.todos = data;
-              })
-              .catch((err) => {
-                console.log(err);
-                this.msg = 'Something went wrong.';
-              })
-              .finally(() => {
-                this.loading = false;
-              });
+            this.doFetch('/delete', { id });
           },
         },
         mounted() {

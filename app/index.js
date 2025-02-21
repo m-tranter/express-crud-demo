@@ -4,20 +4,11 @@
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { v4 } from 'uuid';
-
-const port = process.env.PORT || 3001;
+import { myLogger, makeItem } from './helpers.js'
+const port = process.env.PORT || 3002;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 const dir = path.join(__dirname, '../public');
-const myLogger = function(req, _, next) {
-  console.log(`Incoming: ${req.url}`);
-  next();
-};
-
-const makeItem = (obj) => {
-  return { ...obj, id: v4(), editing: false, v: 0 }
-}
 let items = [makeItem({ text: "Use MongoDb for data persistence", priority: "1" })];
 
 const app = express();
