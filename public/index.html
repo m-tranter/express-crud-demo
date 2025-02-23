@@ -40,6 +40,9 @@
       .myBtn {
         margin-top: 20px;
       }
+      .status {
+        background-color: Wheat;
+      }
     </style>
   </head>
 
@@ -68,14 +71,17 @@
             <button type="button" class="ms-2 btn btn-primary" @click="read">
               Reload
             </button>
+
+            <div>
+              <div class="d-inline-block border rounded status px-2 py-1 mt-3">
+                <p class="mb-0">{{msg}}</p>
+              </div>
+            </div>
           </div>
 
           <div class="text-center mt-3">
             <div v-if="loading" class="spinner-border" role="status">
               <span class="visually-hidden">Loading...</span>
-            </div>
-            <div>
-              <p v-if="msg.length" v-html="msg"></p>
             </div>
           </div>
         </div>
@@ -176,13 +182,12 @@
           return {
             loading: false,
             todos: [],
-            msg: '',
+            msg: 'Ready',
           };
         },
         methods: {
           doFetch: function (verb, body) {
             this.loading = true;
-            this.msg = '';
             let opts =
               verb === '/read'
                 ? {}
@@ -202,7 +207,11 @@
                 }
               })
               .then((data) => {
-                this.todos = data;
+                console.log(data);
+                this.todos = data.items;
+                if (data.error) {
+                  this.msg = data.error;
+                }
               })
               .catch((err) => {
                 console.log(err);
@@ -223,7 +232,6 @@
             item.editing = true;
           },
           add: function () {
-            this.msg = '';
             this.todos.push({
               id: 'Pending',
               text: undefined,
