@@ -25,6 +25,7 @@ const UserSchema = new mongoose.Schema({
 
 const CrudUsers = mongoose.model("CrudUser", UserSchema);
 const Items = mongoose.model("Item", ItemSchema);
+
 const mongoString = `mongodb+srv://marktranter:${mongoPwd}@cluster0.7moof0m.mongodb.net/`;
 mongoose.connect(mongoString);
 const db = mongoose.connection;

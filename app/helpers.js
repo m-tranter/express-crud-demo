@@ -4,6 +4,4 @@ const myLogger = function(req, _, next) {
   next();
 };
 
-
-
 export { myLogger };
