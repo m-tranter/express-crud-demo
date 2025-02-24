@@ -1,31 +1,28 @@
 'use strict';
 
+import { v4 } from 'uuid';
 import express from 'express';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { myLogger, makeItem } from './helpers.js'
-//import { db, Auth } from './mongo.js';
+import { myLogger } from './helpers.js'
+import { db, Items, CrudUsers, getUser } from './mongo.js';
 
-// db.once("connected", () => {
-//   Auth.findOne({ _id: "65f847f55e20aec8afd5c5f6" }).then((auth) => {
-//     console.log(auth.pwd);
-//     console.log(auth.user);
-//   }).catch(err => {
-//     console.log(err);
-//   });
-//
-// })
+db.once("connected", () => {
+  console.log("Mongo connected.")
+  // Use code like this to create a new user.
+  // let user = new CrudUsers({ user: "guest", pwd: "guest" });
+  // user.save();
+});
 
-const port = process.env.PORT || 3002;
+const port = process.env.PORT || 3001;
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const dir = path.join(__dirname, '../public');
-
-let items = [makeItem({ text: "Use MongoDb for data persistence", priority: "1" })];
+let tokens = [];
 
 const app = express();
+app.use(myLogger);
 app.use(express.json());
 app.use(express.static(dir));
-app.use(myLogger);
 
 app.listen(port, (error) => {
   if (!error) {
@@ -35,35 +32,71 @@ app.listen(port, (error) => {
   }
 });
 
-app.post('/create', (req, res) => {
-  items.push(makeItem(req.body))
-  items.sort((a, b) => a.priority - b.priority);
-  res.json({ items })
+app.post('/login', async (req, res) => {
+  let user = await CrudUsers.findOne({ user: req.body.user, pwd: req.body.pwd }).exec();
+  let obj = {};
+  if (user) {
+    obj.items = user.items;
+    let auth = tokens.find(e => e.id === user.id);
+    if (auth) {
+      obj.token = auth.token;
+    } else {
+      obj.token = v4();
+      tokens.push({ token: obj.token, id: user.id })
+    }
+  } else {
+    obj.error = "Invalid credentials.";
+  }
+  res.json(obj)
 });
 
-app.get('/read', (_, res) => {
-  items.sort((a, b) => a.priority - b.priority);
-  res.json({ items })
+app.post('/create', async (req, res) => {
+  let user = await getUser(req.body.token, tokens);
+  if (user) {
+    user.items.push(new Items({ text: req.body.text, priority: req.body.priority, editing: false, v: req.body.v }))
+  }
+  user.items.sort((a, b) => a.priority - b.priority);
+  user.save();
+  res.json({ items: user.items })
 });
 
-app.post('/update', (req, res) => {
+app.post('/read', async (req, res) => {
+  let user = await getUser(req.body.token, tokens);
+  if (user) {
+    res.json(user.items);
+  }
+  else {
+    res.json({ error: "Invalid credentials." })
+  }
+});
+
+app.post('/update', async (req, res) => {
+  let user = await getUser(req.body.token, tokens);
   let update = req.body;
-  let item = items.find(e => e.id === update.id);
+  let item = user.items.find(e => e.id === update.id);
   if (!item) {
-    res.json({ items, error: "Can't find that item now." })
+    res.json({ items: user.items, error: "Can't find that item now." })
   } else if (item.v === update.v) {
     item.v += 1;
     item.text = update.text;
     item.priority = update.priority
-    items.sort((a, b) => a.priority - b.priority);
-    res.json({ items })
+    user.items.sort((a, b) => a.priority - b.priority);
+    user.save();
+    res.json({ items: user.items })
   }
   else {
-    res.json({ items, error: "Not the latest version." })
+    res.json({ items: user.items, error: "Not the latest version." })
   }
 });
 
-app.post('/delete', (req, res) => {
-  items = items.filter(e => e.id !== req.body.id)
-  res.json({ items })
+app.post('/delete', async (req, res) => {
+  let user = await getUser(req.body.token, tokens);
+  if (user) {
+    user.items = user.items.filter(e => JSON.stringify(e._id) !== JSON.stringify(req.body.id));
+    user.save();
+    res.json({ items: user.items });
+  }
+  else {
+    res.json({ error: "Invalid credentials." })
+  }
 });

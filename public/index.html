@@ -51,37 +51,49 @@
       <div id="app">
         <div>
           <h1>CRUD app</h1>
-          <div class="mt-3 todos">
-            <div v-if="todos.length" v-for="item in todos" :key="item.id">
-              <my-todos
-                :item="item"
-                :update="update"
-                :remove="remove"
-                :cancel="cancel"
-                :edit="edit"
-              />
-            </div>
-            <p v-else>Nothing on the list yet.</p>
-          </div>
-
-          <div class="text-center mt-3">
-            <button type="button" class="btn btn-primary" @click="add">
-              Add item
-            </button>
-            <button type="button" class="ms-2 btn btn-primary" @click="read">
-              Reload
-            </button>
-
+          <div v-if="!token">
+            <label for="user">Username</label>
+            <input id="user" v-model="user" type="text" />
+            <label for="pwd">Password</label>
+            <input id="pwd" v-model="pwd" type="password" />
             <div>
-              <div class="d-inline-block border rounded status px-2 py-1 mt-3">
-                <p class="mb-0">{{msg}}</p>
+              <button @click="login" type="button" class="mt-2 btn btn-primary">
+                Login
+              </button>
+            </div>
+          </div>
+          <div v-else>
+            <div class="mt-3 todos">
+              <div v-if="todos.length" v-for="item in todos" :key="item.id">
+                <my-todos
+                  :item="item"
+                  :update="update"
+                  :remove="remove"
+                  :cancel="cancel"
+                  :edit="edit"
+                />
+              </div>
+              <p v-else>Nothing on the list yet.</p>
+            </div>
+            <div class="text-center mt-3">
+              <button type="button" class="btn btn-primary" @click="add">
+                Add item
+              </button>
+              <button type="button" class="ms-2 btn btn-primary" @click="read">
+                Reload
+              </button>
+            </div>
+            <div class="text-center mt-3">
+              <div v-if="loading" class="spinner-border" role="status">
+                <span class="visually-hidden">Loading...</span>
               </div>
             </div>
           </div>
-
-          <div class="text-center mt-3">
-            <div v-if="loading" class="spinner-border" role="status">
-              <span class="visually-hidden">Loading...</span>
+          <div>
+            <div
+              class="d-inline-block text-center border rounded status px-2 py-1 mt-3"
+            >
+              <p class="mb-0">{{msg}}</p>
             </div>
           </div>
         </div>
@@ -93,83 +105,83 @@
       const myTodos = {
         props: ['item', 'update', 'remove', 'cancel', 'edit'],
         template: `
-    <div class="mb-2 border todo bordes-secondary rounded">
-      <div class="row px-2">
-        <div class="col-md-12 col-lg-8 flex-fill">
-          <div class="row">
-            <div class="col-10 flex-fill">
-              <p class="mb-0 mt-1">Id: {{ item.id }}</p>
-              <p class="mb-0">
-                Version: {{ item.v }} , Editing: {{ item.editing }}
-              </p>
-              <label class="visually-hidden" :for="item.id + '_text'"
-                >Text</label
-              >
-              <textarea
-                rows="3"
-                :id="item.id + '_text'"
-                class="mb-2"
-                placeholder="Enter your task"
-                :disabled="!item.editing"
-                v-model="item.text"
-              ></textarea>
+      <div class="mb-2 border todo bordes-secondary rounded">
+        <div class="row px-2">
+          <div class="col-md-12 col-lg-8 flex-fill">
+            <div class="row">
+              <div class="col-10 flex-fill">
+                <p class="mb-0 mt-1">Id: {{ item._id }}</p>
+                <p class="mb-0">
+                  Version: {{ item.v }} , Editing: {{ item.editing }}
+                </p>
+                <label class="visually-hidden" :for="item._id + '_text'"
+                  >Text</label
+                >
+                <textarea
+                  rows="3"
+                  :id="item._id + '_text'"
+                  class="mb-2"
+                  placeholder="Enter your task"
+                  :disabled="!item.editing"
+                  v-model="item.text"
+                ></textarea>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="col-12 col-lg-4 mb-3 mb-lg-0">
-          <div class="row mt-md-4">
-            <div class="col">
-              <label :for="item.id + '_priority'">Priority</label>
-              <input
-                :id="item.id + '_priority'"
-                type="number"
-                v-model="item.priority"
-                min="0"
-                max="10"
-                :disabled="!item.editing"
-              />
-            </div>
-            <div class="col" :class="{'d-none': item.editing}">
-              <button
-                type="button"
-                @click="edit(item.id)"
-                class="myBtn btn btn-primary"
-              >
-                Edit
-              </button>
-            </div>
-            <div class="col" :class="{'d-none': !item.editing}">
-              <button
-                type="button"
-                class="myBtn btn btn-primary"
-                @click="update(item.id)"
-              >
-                Save
-              </button>
-            </div>
-            <div class="col-auto" :class="{'d-none': item.editing}">
-              <button
-                type="button"
-                class="myBtn btn btn-danger"
-                @click="remove(item.id)"
-              >
-                Delete
-              </button>
-            </div>
-            <div class="col-auto" :class="{'d-none': !item.editing}">
-              <button
-                type="button"
-                class="myBtn btn btn-danger"
-                @click="cancel(item.id)"
-              >
-                Cancel
-              </button>
+          <div class="col-12 col-lg-4 mb-3 mb-lg-0">
+            <div class="row mt-md-4">
+              <div class="col">
+                <label :for="item._id + '_priority'">Priority</label>
+                <input
+                  :id="item._id + '_priority'"
+                  type="number"
+                  v-model="item.priority"
+                  min="0"
+                  max="10"
+                  :disabled="!item.editing"
+                />
+              </div>
+              <div class="col" :class="{'d-none': item.editing}">
+                <button
+                  type="button"
+                  @click="edit(item._id)"
+                  class="myBtn btn btn-primary"
+                >
+                  Edit
+                </button>
+              </div>
+              <div class="col" :class="{'d-none': !item.editing}">
+                <button
+                  type="button"
+                  class="myBtn btn btn-primary"
+                  @click="update(item._id)"
+                >
+                  Save
+                </button>
+              </div>
+              <div class="col-auto" :class="{'d-none': item.editing}">
+                <button
+                  type="button"
+                  class="myBtn btn btn-danger"
+                  @click="remove(item._id)"
+                >
+                  Delete
+                </button>
+              </div>
+              <div class="col-auto" :class="{'d-none': !item.editing}">
+                <button
+                  type="button"
+                  class="myBtn btn btn-danger"
+                  @click="cancel(item._id)"
+                >
+                  Cancel
+                </button>
+              </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-                   `,
+                     `,
       };
 
       const { createApp } = Vue;
@@ -180,25 +192,31 @@
         },
         data() {
           return {
+            token: undefined,
             loading: false,
             todos: [],
-            msg: 'Ready',
+            msg: 'Not logged in',
+            user: '',
+            pwd: '',
           };
         },
         methods: {
-          doFetch: function (verb, body) {
+          login: function () {
+            this.doFetch('/login', { user: this.user, pwd: this.pwd });
+          },
+          doFetch: function (endpoint, body) {
             this.loading = true;
-            let opts =
-              verb === '/read'
-                ? {}
-                : {
-                    method: 'post',
-                    body: JSON.stringify(body),
-                    headers: {
-                      'Content-Type': 'application/json; charset=utf-8',
-                    },
-                  };
-            fetch(verb, opts)
+            if (this.token) {
+              body.token = this.token;
+            }
+            let opts = {
+              method: 'post',
+              body: JSON.stringify(body),
+              headers: {
+                'Content-Type': 'application/json; charset=utf-8',
+              },
+            };
+            fetch(endpoint, opts)
               .then((response) => {
                 if (response.ok) {
                   return response.json();
@@ -207,33 +225,42 @@
                 }
               })
               .then((data) => {
-                console.log(data);
-                this.todos = data.items;
                 if (data.error) {
-                  this.msg = data.error;
+                  throw data.error;
+                }
+                if (endpoint === '/login') {
+                  if (data.token) {
+                    this.token = data.token;
+                    this.msg = 'Logged in.';
+                    this.read();
+                  } else {
+                    throw this.error;
+                  }
+                }
+                if (data.items) {
+                  this.todos = data.items;
                 }
               })
               .catch((err) => {
-                console.log(err);
-                this.msg = 'Something went wrong.';
+                this.msg = err;
               })
               .finally(() => {
                 this.loading = false;
               });
           },
           cancel: function (id) {
-            let item = this.todos.find((e) => e.id === id);
+            let item = this.todos.find((e) => e._id === id);
             item.text = this.temp;
             item.editing = false;
           },
           edit: function (id) {
-            let item = this.todos.find((e) => e.id === id);
+            let item = this.todos.find((e) => e._id === id);
             this.temp = item.text;
             item.editing = true;
           },
           add: function () {
             this.todos.push({
-              id: 'Pending',
+              _id: 'Pending',
               text: undefined,
               v: 0,
               priority: 9,
@@ -245,7 +272,7 @@
             this.doFetch('/read', {});
           },
           update: function (id) {
-            let update = this.todos.find((e) => e.id === id);
+            let update = this.todos.find((e) => e._id === id);
             if (id === 'Pending') {
               this.doFetch('/create', update);
             } else {
@@ -257,9 +284,7 @@
             this.doFetch('/delete', { id });
           },
         },
-        mounted() {
-          this.read();
-        },
+        mounted() {},
       }).mount('#app');
     </script>
   </body>
