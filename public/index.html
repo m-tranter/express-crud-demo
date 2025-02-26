@@ -55,7 +55,12 @@
             <label for="user">Username</label>
             <input id="user" v-model="user" type="text" />
             <label for="pwd">Password</label>
-            <input id="pwd" v-model="pwd" type="password" />
+            <input
+              @keyup.enter="login"
+              id="pwd"
+              v-model="pwd"
+              type="password"
+            />
             <div>
               <button @click="login" type="button" class="mt-2 btn btn-primary">
                 Login
@@ -78,9 +83,6 @@
             <div class="text-center mt-3">
               <button type="button" class="btn btn-primary" @click="add">
                 Add item
-              </button>
-              <button type="button" class="ms-2 btn btn-primary" @click="read">
-                Reload
               </button>
             </div>
             <div class="text-center mt-3">
