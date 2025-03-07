@@ -51,51 +51,60 @@
       <div id="app">
         <div>
           <h1>CRUD app</h1>
-          <div v-if="!token">
-            <label for="user">Username</label>
-            <input id="user" v-model="user" type="text" />
-            <label for="pwd">Password</label>
-            <input
-              @keyup.enter="login"
-              id="pwd"
-              v-model="pwd"
-              type="password"
-            />
-            <div>
-              <button @click="login" type="button" class="mt-2 btn btn-primary">
-                Login
-              </button>
+          <div v-if="loading" class="mt-4">
+            <div class="spinner-border" role="status">
+              <span class="visually-hidden">Loading...</span>
             </div>
           </div>
           <div v-else>
-            <div class="mt-3 todos">
-              <div v-if="todos.length" v-for="item in todos" :key="item.id">
-                <my-todos
-                  :item="item"
-                  :update="update"
-                  :remove="remove"
-                  :cancel="cancel"
-                  :edit="edit"
-                />
+            <div v-if="!token">
+              <label for="user">Username</label>
+              <input id="user" v-model="user" type="text" />
+              <label for="pwd">Password</label>
+              <input
+                @keyup.enter="login"
+                id="pwd"
+                v-model="pwd"
+                type="password"
+              />
+              <div>
+                <button
+                  @click="login"
+                  type="button"
+                  class="mt-2 btn btn-primary"
+                >
+                  Login
+                </button>
               </div>
-              <p v-else>Nothing on the list yet.</p>
-            </div>
-            <div class="text-center mt-3">
-              <button type="button" class="btn btn-primary" @click="add">
-                Add item
-              </button>
-            </div>
-            <div class="text-center mt-3">
-              <div v-if="loading" class="spinner-border" role="status">
-                <span class="visually-hidden">Loading...</span>
+              <div class="d-inline-block">
+                <p class="px-2 py-1 mt-3 border rounded status mb-0">{{msg}}</p>
               </div>
             </div>
-          </div>
-          <div>
-            <div
-              class="d-inline-block text-center border rounded status px-2 py-1 mt-3"
-            >
-              <p class="mb-0">{{msg}}</p>
+            <div v-else>
+              <div class="mt-3 todos">
+                <div v-if="todos.length" v-for="item in todos" :key="item.id">
+                  <my-todos
+                    :item="item"
+                    :update="update"
+                    :remove="remove"
+                    :cancel="cancel"
+                    :edit="edit"
+                  />
+                </div>
+                <p v-else>Nothing on the list yet.</p>
+              </div>
+              <div class="text-center mt-3">
+                <button type="button" class="btn btn-primary" @click="add">
+                  Add item
+                </button>
+              </div>
+              <div class="text-center">
+                <div class="d-inline-block">
+                  <p class="px-2 py-1 mt-3 border rounded status mb-0">
+                    {{msg}}
+                  </p>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -104,86 +113,76 @@
 
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script>
+      'use strict';
       const myTodos = {
         props: ['item', 'update', 'remove', 'cancel', 'edit'],
         template: `
-      <div class="mb-2 border todo bordes-secondary rounded">
-        <div class="row px-2">
-          <div class="col-md-12 col-lg-8 flex-fill">
-            <div class="row">
-              <div class="col-10 flex-fill">
-                <p class="mb-0 mt-1">Id: {{ item._id }}</p>
-                <p class="mb-0">
-                  Version: {{ item.v }} , Editing: {{ item.editing }}
-                </p>
-                <label class="visually-hidden" :for="item._id + '_text'"
-                  >Text</label
-                >
-                <textarea
-                  rows="3"
-                  :id="item._id + '_text'"
-                  class="mb-2"
-                  placeholder="Enter your task"
-                  :disabled="!item.editing"
-                  v-model="item.text"
-                ></textarea>
-              </div>
+        <div class="mb-2 border todo border-secondary rounded">
+          <div class="row align-items-center g-2 p-2">
+            <div class="col-md-8 flex-fill">
+              <label class="visually-hidden" :for="item._id + '_text'">Text</label>
+              <textarea
+                rows="3"
+                :id="item._id + '_text'"
+                placeholder="Enter your task"
+                :disabled="!item.editing"
+                v-model="item.text"
+              ></textarea>
             </div>
-          </div>
-          <div class="col-12 col-lg-4 mb-3 mb-lg-0">
-            <div class="row mt-md-4">
-              <div class="col">
-                <label :for="item._id + '_priority'">Priority</label>
-                <input
-                  :id="item._id + '_priority'"
-                  type="number"
-                  v-model="item.priority"
-                  min="0"
-                  max="10"
-                  :disabled="!item.editing"
-                />
-              </div>
-              <div class="col" :class="{'d-none': item.editing}">
-                <button
-                  type="button"
-                  @click="edit(item._id)"
-                  class="myBtn btn btn-primary"
-                >
-                  Edit
-                </button>
-              </div>
-              <div class="col" :class="{'d-none': !item.editing}">
-                <button
-                  type="button"
-                  class="myBtn btn btn-primary"
-                  @click="update(item._id)"
-                >
-                  Save
-                </button>
-              </div>
-              <div class="col-auto" :class="{'d-none': item.editing}">
-                <button
-                  type="button"
-                  class="myBtn btn btn-danger"
-                  @click="remove(item._id)"
-                >
-                  Delete
-                </button>
-              </div>
-              <div class="col-auto" :class="{'d-none': !item.editing}">
-                <button
-                  type="button"
-                  class="myBtn btn btn-danger"
-                  @click="cancel(item._id)"
-                >
-                  Cancel
-                </button>
+            <div class="col-12 col-lg-4">
+              <div class="row align-items-center">
+                <div class="col">
+                  <label :for="item._id + '_priority'">Priority</label>
+                  <input
+                    :id="item._id + '_priority'"
+                    type="number"
+                    v-model="item.priority"
+                    min="0"
+                    max="10"
+                    :disabled="!item.editing"
+                  />
+                </div>
+                <div class="col" :class="{'d-none': item.editing}">
+                  <button
+                    type="button"
+                    @click="edit(item._id)"
+                    class="myBtn btn btn-primary"
+                  >
+                    Edit
+                  </button>
+                </div>
+                <div class="col" :class="{'d-none': !item.editing}">
+                  <button
+                    type="button"
+                    class="myBtn btn btn-primary"
+                    @click="update(item._id)"
+                  >
+                    Save
+                  </button>
+                </div>
+                <div class="col-auto" :class="{'d-none': item.editing}">
+                  <button
+                    type="button"
+                    class="myBtn btn btn-danger"
+                    @click="remove(item._id)"
+                  >
+                    Delete
+                  </button>
+                </div>
+                <div class="col-auto" :class="{'d-none': !item.editing}">
+                  <button
+                    type="button"
+                    class="myBtn btn btn-danger"
+                    @click="cancel(item._id)"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-                     `,
+        `,
       };
 
       const { createApp } = Vue;
@@ -194,12 +193,12 @@
         },
         data() {
           return {
-            token: undefined,
             loading: false,
-            todos: [],
             msg: 'Not logged in',
-            user: '',
             pwd: '',
+            todos: [],
+            token: undefined,
+            user: '',
           };
         },
         methods: {
@@ -227,27 +226,18 @@
                 }
               })
               .then((data) => {
-                if (data.error) {
-                  throw data.error;
-                }
                 if (endpoint === '/login') {
                   if (data.token) {
                     this.token = data.token;
-                    this.msg = 'Logged in.';
-                    this.read();
-                  } else {
-                    throw this.error;
                   }
                 }
-                if (data.items) {
-                  this.todos = data.items;
-                }
+                this.msg = data.msg;
+                this.todos = data.items || [];
+                this.loading = false;
               })
               .catch((err) => {
-                this.msg = err;
-              })
-              .finally(() => {
                 this.loading = false;
+                this.msg = err;
               });
           },
           cancel: function (id) {
@@ -269,9 +259,6 @@
               editing: true,
               temp: '',
             });
-          },
-          read: function () {
-            this.doFetch('/read', {});
           },
           update: function (id) {
             let update = this.todos.find((e) => e._id === id);

@@ -34,20 +34,23 @@ app.listen(port, (error) => {
 
 app.post('/login', async (req, res) => {
   let user = await CrudUsers.findOne({ user: req.body.user, pwd: req.body.pwd }).exec();
-  let obj = {};
+  let items;
+  let token;
+  let msg;
   if (user) {
-    obj.items = user.items;
+    items = user.items;
+    msg = "Credentials validated."
     let auth = tokens.find(e => e.id === user.id);
     if (auth) {
-      obj.token = auth.token;
+      token = auth.token;
     } else {
-      obj.token = v4();
-      tokens.push({ token: obj.token, id: user.id })
+      token = v4();
+      tokens.push({ token, id: user.id })
     }
   } else {
-    obj.error = "Invalid credentials.";
+    msg = "Invalid credentials.";
   }
-  res.json(obj)
+  res.json({ token, msg, items })
 });
 
 app.post('/create', async (req, res) => {
@@ -57,35 +60,35 @@ app.post('/create', async (req, res) => {
   }
   user.items.sort((a, b) => a.priority - b.priority);
   user.save();
-  res.json({ items: user.items })
+  res.json({ msg: "Item created.", items: user.items })
 });
 
 app.post('/read', async (req, res) => {
   let user = await getUser(req.body.token, tokens);
   if (user) {
-    res.json(user.items);
+    res.json({ msg: "Data read.", items: user.items });
   }
   else {
-    res.json({ error: "Invalid credentials." })
+    res.json({ msg: "Invalid credentials." })
   }
 });
 
 app.post('/update', async (req, res) => {
   let user = await getUser(req.body.token, tokens);
   let update = req.body;
-  let item = user.items.find(e => e.id === update.id);
+  let item = user.items.find(e => e._id.toString() === update._id);
   if (!item) {
-    res.json({ items: user.items, error: "Can't find that item now." })
+    res.json({ msg: "Can't find that item now.", items: user.items })
   } else if (item.v === update.v) {
     item.v += 1;
     item.text = update.text;
     item.priority = update.priority
     user.items.sort((a, b) => a.priority - b.priority);
     user.save();
-    res.json({ items: user.items })
+    res.json({ msg: "Item updated", items: user.items })
   }
   else {
-    res.json({ items: user.items, error: "Not the latest version." })
+    res.json({ msg: "Not the latest version.", items: user.items })
   }
 });
 
@@ -94,9 +97,9 @@ app.post('/delete', async (req, res) => {
   if (user) {
     user.items = user.items.filter(e => JSON.stringify(e._id) !== JSON.stringify(req.body.id));
     user.save();
-    res.json({ items: user.items });
+    res.json({ msg: "Item deleted.", items: user.items });
   }
   else {
-    res.json({ error: "Invalid credentials." })
+    res.json({ msg: "Invalid credentials." })
   }
 });
