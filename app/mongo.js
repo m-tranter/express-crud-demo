@@ -1,6 +1,6 @@
 'use strict';
 // Comment next line out when pushing to render
-import { } from 'dotenv/config';
+//import { } from 'dotenv/config';
 import mongoose from "mongoose";
 
 const mongoString = process.env.MONGO_STRING;
