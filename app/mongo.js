@@ -1,9 +1,9 @@
-
+'use strict';
 // Comment next line out when pushing to render
-//import { } from 'dotenv/config';
+import { } from 'dotenv/config';
 import mongoose from "mongoose";
 
-let mongoPwd = process.env.MONGO_PWD;
+const mongoString = process.env.MONGO_STRING;
 
 const ItemSchema = new mongoose.Schema({
   editing: Boolean,
@@ -21,13 +21,12 @@ const UserSchema = new mongoose.Schema({
     required: true,
     type: String,
   },
-  items: []
+  items: [ItemSchema]
 });
 
 const CrudUsers = mongoose.model("CrudUser", UserSchema);
 const Items = mongoose.model("Item", ItemSchema);
 
-const mongoString = `mongodb+srv://marktranter:${mongoPwd}@cluster0.7moof0m.mongodb.net/`;
 mongoose.connect(mongoString);
 const db = mongoose.connection;
 db.on("error", (error) => {
@@ -36,8 +35,10 @@ db.on("error", (error) => {
 
 const getUser = async (token, tokens) => {
   let auth = tokens.find(e => e.token === token);
-  let user = await CrudUsers.findById(auth.id);
-  return user;
+  if (auth) {
+    let user = await CrudUsers.findById(auth.id);
+    return user;
+  }
 }
 
 export { db, CrudUsers, Items, getUser }

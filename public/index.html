@@ -17,7 +17,7 @@
     <div class="my-3 container">
       <div id="app">
         <div>
-          <h1>CRUD app</h1>
+          <h1>CRUD</h1>
           <div v-if="loading" class="mt-4">
             <div class="spinner-border" role="status">
               <span class="visually-hidden">Loading...</span>
@@ -198,6 +198,9 @@
                     this.token = data.token;
                   }
                 }
+                if (data.msg === 'Invalid credentials.') {
+                  throw 'Invalid credentials.';
+                }
                 this.msg = data.msg;
                 this.todos = data.items || [];
                 this.loading = false;
@@ -205,6 +208,7 @@
               .catch((err) => {
                 this.loading = false;
                 this.msg = err;
+                this.token = undefined;
               });
           },
           cancel: function (id) {
